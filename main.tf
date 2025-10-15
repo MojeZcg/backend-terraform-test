@@ -65,3 +65,6 @@ resource "aws_instance" "terraform-example" {
     key_name = aws_key_pair.terraform-example-key.key_name
 }
 
+output "public_ip" {
+  value = aws_instance.python_docker_instance.public_ip
+}
