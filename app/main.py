@@ -1,11 +1,21 @@
+import os
 from flask import Flask
+from sqlalchemy import create_engine
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 
+db_url = os.getenv("DATABASE_URL")
+engine = create_engine(db_url)
+
 
 @app.route("/")
-def home():
-    return "🚀 ¡Hola desde Flask en Docker con AWS EC2!"
+def index():
+    with engine.connect() as conn:
+        result = conn.execute("SELECT 'Hello from PostgreSQL!'").fetchone()
+    return f"<h1>{result[0]}</h1>"
 
 
 if __name__ == "__main__":
