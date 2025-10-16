@@ -187,6 +187,7 @@ override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
+variables.tf
 
 # .tfstate files
 *.tfstate
