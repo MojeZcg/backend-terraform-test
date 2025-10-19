@@ -12,15 +12,15 @@ Proyecto de ejemplo para gestionar infraestructura con Terraform. Contiene confi
 - Credenciales del proveedor cloud configuradas (Amazon Cloud Services)
 - Herramientas opcionales: psql, psycopg2 y sqlalchemy
 
-## Estructura típica
+## Estructura
 
+- app/
+  └ Dockerfile
+  └ main.py
+  └ requirements.txt
 - main.tf
 - variables.tf
-- outputs.tf
-- providers.tf
-- modules/...
-- envs/
-- README.md
+- output.tf
 
 (Ajustar según el contenido real del repositorio)
 
