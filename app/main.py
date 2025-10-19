@@ -20,24 +20,25 @@ def index():
 def get_users():
     """Devuelve todos los usuarios en formato JSON"""
     with engine.connect() as conn:
-        result = conn.execute(
-            text("SELECT id, name, created_at FROM public.users")
-        ).fetchall()
+        result = conn.execute(text("SELECT id, name, created_at FROM public.users"))
         users = [
-            {"id": row.id, "name": row.name, "created_at": row.created_at.isoformat()}
-            for row in result
+            {
+                "id": row[0],
+                "name": row[1],
+                "created_at": row[2].isoformat() if row[2] else None,
+            }
+            for row in result.fetchall()
         ]
-        return jsonify(users)
+    return jsonify(users)
 
 
 @app.route("/users", methods=["POST"])
 def create_user():
-    """Crea un nuevo usuario"""
     data = request.get_json()
     if not data or "name" not in data:
         return jsonify({"error": "Falta el campo 'name'"}), 400
 
-    with engine.connect() as conn:
+    with engine.begin() as conn:  # <<-- usar begin() en lugar de connect()
         result = conn.execute(
             text(
                 "INSERT INTO public.users (name) VALUES (:name) RETURNING id, name, created_at"
@@ -45,17 +46,22 @@ def create_user():
             {"name": data["name"]},
         )
         new_user = result.fetchone()
-        conn.commit()
-        return (
-            jsonify(
-                {
-                    "id": new_user.id,
-                    "name": new_user.name,
-                    "created_at": new_user.created_at.isoformat(),
-                }
-            ),
-            201,
-        )
+
+    if not new_user:
+        return jsonify({"error": "No se pudo crear el usuario"}), 500
+
+    return (
+        jsonify(
+            {
+                "id": new_user.id,
+                "name": new_user.name,
+                "created_at": (
+                    new_user.created_at.isoformat() if new_user.created_at else None
+                ),
+            }
+        ),
+        201,
+    )
 
 
 @app.route("/routes")
