@@ -18,10 +18,10 @@ jobs:
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ec2-user
-        key: ${{ secrets.EC2_SSH_KEY }}
+        key: ${{ secrets.EC2_KEY }}
         port: 22
         script: |
           cd /home/ec2-user/app
           git pull origin main
-          pkill -f "python main.py" || true
-          python main.py 
+          docker-compose down
+          docker-compose up -d --build
