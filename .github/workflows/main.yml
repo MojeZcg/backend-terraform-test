@@ -31,5 +31,5 @@ jobs:
               
               docker build -t python-flask-app:latest . --no-cache
 
-              docker run -d --restart always --env-file .env -p 3000:3000 --name py-app python-flask-app
+              docker run -d --restart always --env-file .env -p 3000:3000 --name py-app python-flask-app:latest
             '
