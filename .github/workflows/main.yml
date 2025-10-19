@@ -25,6 +25,7 @@ jobs:
             cd /home/ec2-user/app
             git pull origin main
 
+            cd /home/ec2-user/app/app
             docker stop py-app || true
             docker rm py-app || true
             
