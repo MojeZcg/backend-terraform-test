@@ -21,12 +21,17 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         port: 22
         script: |
+          bash -c '
             cd /home/ec2-user/app
             git pull origin main
 
             docker stop py-app || true
-            docker rm python-flask-app || true
+            docker rm py-app || true
+            
+            timestamp=$(date +%Y%m%d%H%M%S)
+            docker build -t python-flask-app:latest -t python-flask-app:$timestamp . --no-cache
 
-            docker build -t python-flask-app .
+            docker image prune -f
 
             docker run -d --restart always --env-file .env -p 3000:3000 --name py-app python-flask-app
+          '
