@@ -12,7 +12,7 @@ engine = create_engine(DATABASE_URL)
 @app.route("/")
 def index():
     with engine.connect() as conn:
-        result = conn.execute(text("SELECT 'Hello from PostgreSQL!'")).fetchone()
+        result = conn.execute(text("SELECT 'Hola desde PostgreSQL!'")).fetchone()
         return f"<h1>{result[0]}</h1>"
 
 
