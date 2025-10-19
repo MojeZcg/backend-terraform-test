@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect
 from sqlalchemy import create_engine, text
 import boto3
 from dotenv import load_dotenv
@@ -83,6 +83,20 @@ def list_files():
             }
         )
     return jsonify(files)
+
+
+@app.route("/files/<filename>", methods=["GET"])
+def get_file(filename):
+    try:
+        # Generar URL pre-firmada (válida 1 hora)
+        url = s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": BUCKET_NAME, "Key": filename},
+            ExpiresIn=3600,
+        )
+        return redirect(url)  # Redirige al navegador al S3
+    except s3.exceptions.NoSuchKey:
+        return jsonify({"error": "Archivo no encontrado"}), 404
 
 
 @app.route("/routes")

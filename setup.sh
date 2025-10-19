@@ -18,4 +18,5 @@ echo "BUCKET_NAME=${bucket_name}" >> .env
 
 # Construir y ejecutar Docker
 docker build -t python-flask-app .
+docker image prune -f
 docker run -d --restart always --env-file .env -p 3000:3000 --name py-app python-flask-app
