@@ -1,12 +1,17 @@
 import os
 from flask import Flask, jsonify, request
 from sqlalchemy import create_engine, text
+import boto3
+from dotenv import load_dotenv
 
-app = Flask(__name__)
+load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+BUCKET_NAME = os.getenv("BUCKET_NAME")
 
+app = Flask(__name__)
 engine = create_engine(DATABASE_URL)
+s3 = boto3.client("s3")
 
 
 @app.route("/")
@@ -62,6 +67,22 @@ def create_user():
         ),
         201,
     )
+
+
+@app.route("/files", methods=["GET"])
+def list_files():
+    # Listar objetos del bucket
+    objects = s3.list_objects_v2(Bucket=BUCKET_NAME)
+    files = []
+    for obj in objects.get("Contents", []):
+        files.append(
+            {
+                "key": obj["Key"],
+                "size": obj["Size"],
+                "last_modified": obj["LastModified"].isoformat(),
+            }
+        )
+    return jsonify(files)
 
 
 @app.route("/routes")

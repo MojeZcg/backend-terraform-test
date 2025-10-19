@@ -2,3 +2,4 @@ flask
 psycopg2-binary
 sqlalchemy
 python-dotenv
+boto3

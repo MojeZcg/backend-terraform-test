@@ -6,3 +6,7 @@ output "db_endpoint" {
   value     = aws_db_instance.app_db.address
   sensitive = true
 }
+
+output "bucket_name" {
+  value = aws_s3_bucket.internal_bucket.id
+}

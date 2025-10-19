@@ -14,6 +14,7 @@ cd app/app
 
 # Variables de conexión a la DB (inyectadas desde Terraform)
 echo "DATABASE_URL=${database_url}" > .env
+echo "BUCKET_NAME=${bucket_name}" >> .env
 
 # Construir y ejecutar Docker
 docker build -t python-flask-app .

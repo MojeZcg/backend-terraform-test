@@ -94,15 +94,77 @@ resource "aws_db_instance" "app_db" {
   publicly_accessible = true
 }
 
+#### S3 Bucket
+
+resource "aws_s3_bucket" "internal_bucket" {
+  bucket = "bucket-interno-terraform"
+
+  tags = {
+    Name        = "InternalBucket"
+    Environment = "Dev"
+  }
+}
+
+# Política mínima para acceso desde IAM roles (Lambda/ECS/etc.)
+resource "aws_iam_policy" "s3_access_policy" {
+  name        = "S3InternalAccess"
+  description = "Permite listar y obtener objetos del bucket privado"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = aws_s3_bucket.internal_bucket.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Resource = "${aws_s3_bucket.internal_bucket.arn}/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_s3_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = { Service = "ec2.amazonaws.com" },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.s3_access_policy.arn
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_instance_profile"
+  role = aws_iam_role.ec2_role.name
+}
+
 # EC2 Instance
 resource "aws_instance" "app_instance" {
   ami           = "ami-0ba39aef11896824a" # Amazon Linux 2023 AMI 
   instance_type = var.instance_type
   key_name      = aws_key_pair.terraform_key.key_name
   vpc_security_group_ids = [aws_security_group.app_sg.id]
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   user_data = templatefile("setup.sh", {
-    database_url = "postgresql://${var.db_username}:${var.db_password}@${aws_db_instance.app_db.address}:5432/${aws_db_instance.app_db.db_name}"
+    database_url = "postgresql://${var.db_username}:${var.db_password}@${aws_db_instance.app_db.address}:5432/${aws_db_instance.app_db.db_name}",
+    bucket_name  = aws_s3_bucket.internal_bucket.id
   })
 
   tags = {
