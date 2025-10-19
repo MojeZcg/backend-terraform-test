@@ -21,7 +21,12 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         port: 22
         script: |
-          cd /home/ec2-user/app
-          git pull origin main
-          docker-compose down
-          docker-compose up -d --build
+            cd /home/ec2-user/app
+            git pull origin main
+
+            docker stop py-app || true
+            docker rm python-flask-app || true
+
+            docker build -t python-flask-app .
+
+            docker run -d --restart always --env-file .env -p 3000:3000 --name py-app python-flask-app
