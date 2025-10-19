@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from sqlalchemy import create_engine, text
 
 app = Flask(__name__)
@@ -56,6 +56,12 @@ def create_user():
             ),
             201,
         )
+
+
+@app.route("/routes")
+def list_routes():
+    routes = [rule.rule for rule in app.url_map.iter_rules()]
+    return jsonify(routes)
 
 
 if __name__ == "__main__":
