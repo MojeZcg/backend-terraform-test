@@ -30,5 +30,33 @@ def get_users():
         return jsonify(users)
 
 
+@app.route("/users", methods=["POST"])
+def create_user():
+    """Crea un nuevo usuario"""
+    data = request.get_json()
+    if not data or "name" not in data:
+        return jsonify({"error": "Falta el campo 'name'"}), 400
+
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(
+                "INSERT INTO public.users (name) VALUES (:name) RETURNING id, name, created_at"
+            ),
+            {"name": data["name"]},
+        )
+        new_user = result.fetchone()
+        conn.commit()
+        return (
+            jsonify(
+                {
+                    "id": new_user.id,
+                    "name": new_user.name,
+                    "created_at": new_user.created_at.isoformat(),
+                }
+            ),
+            201,
+        )
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000)

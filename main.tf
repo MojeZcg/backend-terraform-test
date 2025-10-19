@@ -1,3 +1,8 @@
+### Terraform Configuration for AWS Infrastructure
+provider "aws" {
+  region = var.aws_region
+}
+
 #### SSH Key
 resource "aws_key_pair" "terraform_key" {
   key_name   = var.key_name
@@ -53,7 +58,16 @@ resource "aws_security_group" "db_sg" {
     security_groups = [aws_security_group.app_sg.id]
   }
 
+  ingress {
+    description     = "PostgreSQL everywhere"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
+    description = "Egress all"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -77,20 +91,12 @@ resource "aws_db_instance" "app_db" {
   db_name            = "appdb"
   vpc_security_group_ids = [aws_security_group.db_sg.id]
   skip_final_snapshot = true
+  publicly_accessible = true
 }
 
 # EC2 Instance
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-  owners      = ["amazon"]
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
-}
-
 resource "aws_instance" "app_instance" {
-  ami           = data.aws_ami.amazon_linux.id
+  ami           = "ami-0ba39aef11896824a" # Amazon Linux 2023 AMI 
   instance_type = var.instance_type
   key_name      = aws_key_pair.terraform_key.key_name
   vpc_security_group_ids = [aws_security_group.app_sg.id]

@@ -17,4 +17,4 @@ echo "DATABASE_URL=${database_url}" > .env
 
 # Construir y ejecutar Docker
 docker build -t python-flask-app .
-docker run -d --restart always -p 3000:3000 python-flask-app
+docker run -d --restart always --env-file .env -p 3000:3000 --name py-app python-flask-app
