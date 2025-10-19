@@ -1,0 +1,38 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Deploy to EC2 via SSH
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_KEY }}
+        port: 22
+        script: |
+          bash -c '
+            cd /home/ec2-user/app
+            git pull origin main
+
+            cd /home/ec2-user/app/app
+            docker stop py-app || true
+            docker rm py-app || true
+            
+            timestamp=$(date +%Y%m%d%H%M%S)
+            docker build -t python-flask-app:latest -t python-flask-app:$timestamp . --no-cache
+
+            docker image prune -f
+
+            docker run -d --restart always --env-file .env -p 3000:3000 --name py-app python-flask-app
+          '
