@@ -15,14 +15,12 @@ Proyecto de ejemplo para gestionar infraestructura con Terraform. Contiene confi
 ## Estructura
 
 - app/
-  └ Dockerfile
-  └ main.py
-  └ requirements.txt
+  - Dockerfile
+  - main.py
+  - requirements.txt
 - main.tf
 - variables.tf
 - output.tf
-
-(Ajustar según el contenido real del repositorio)
 
 ## Licencia
 
