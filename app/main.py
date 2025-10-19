@@ -21,7 +21,7 @@ def index():
         return f"<h1>{result[0]}</h1>"
 
 
-@app.route("/users", methods=["GET"])
+@app.route("/u", methods=["GET"])
 def get_users():
     """Devuelve todos los usuarios en formato JSON"""
     with engine.connect() as conn:
@@ -37,7 +37,7 @@ def get_users():
     return jsonify(users)
 
 
-@app.route("/users", methods=["POST"])
+@app.route("/u", methods=["POST"])
 def create_user():
     data = request.get_json()
     if not data or "name" not in data:
@@ -69,7 +69,7 @@ def create_user():
     )
 
 
-@app.route("/files", methods=["GET"])
+@app.route("/f", methods=["GET"])
 def list_files():
     # Listar objetos del bucket
     objects = s3.list_objects_v2(Bucket=BUCKET_NAME)
@@ -85,7 +85,7 @@ def list_files():
     return jsonify(files)
 
 
-@app.route("/files/<filename>", methods=["GET"])
+@app.route("/f/<filename>", methods=["GET"])
 def get_file(filename):
     try:
         # Generar URL pre-firmada (válida 1 hora)
@@ -99,7 +99,7 @@ def get_file(filename):
         return jsonify({"error": "Archivo no encontrado"}), 404
 
 
-@app.route("/routes")
+@app.route("/r")
 def list_routes():
     routes = [rule.rule for rule in app.url_map.iter_rules()]
     return jsonify(routes)
