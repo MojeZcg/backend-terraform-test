@@ -58,14 +58,6 @@ resource "aws_security_group" "db_sg" {
     security_groups = [aws_security_group.app_sg.id]
   }
 
-  ingress {
-    description     = "PostgreSQL everywhere"
-    from_port       = 5432
-    to_port         = 5432
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
   egress {
     description = "Egress all"
     from_port   = 0
@@ -91,11 +83,9 @@ resource "aws_db_instance" "app_db" {
   db_name            = "appdb"
   vpc_security_group_ids = [aws_security_group.db_sg.id]
   skip_final_snapshot = true
-  publicly_accessible = true
 }
 
 #### S3 Bucket
-
 resource "aws_s3_bucket" "internal_bucket" {
   bucket = "bucket-interno-terraform"
 
@@ -154,6 +144,15 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role = aws_iam_role.ec2_role.name
 }
 
+# Crear Elastic IP
+resource "aws_eip" "app_eip" {
+}
+
+resource "aws_eip_association" "eip_assoc" {
+  instance_id   = aws_instance.app_instance.id
+  allocation_id = aws_eip.app_eip.id
+}
+
 # EC2 Instance
 resource "aws_instance" "app_instance" {
   ami           = "ami-0ba39aef11896824a" # Amazon Linux 2023 AMI 
@@ -161,6 +160,7 @@ resource "aws_instance" "app_instance" {
   key_name      = aws_key_pair.terraform_key.key_name
   vpc_security_group_ids = [aws_security_group.app_sg.id]
   iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
+  associate_public_ip_address = true 
 
   user_data = templatefile("setup.sh", {
     database_url = "postgresql://${var.db_username}:${var.db_password}@${aws_db_instance.app_db.address}:5432/${aws_db_instance.app_db.db_name}",
@@ -172,3 +172,4 @@ resource "aws_instance" "app_instance" {
     Environment = "test"
   }
 }
+

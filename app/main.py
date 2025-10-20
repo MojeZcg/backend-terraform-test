@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request, redirect
 from sqlalchemy import create_engine, text
 import boto3
 from dotenv import load_dotenv
+from db import init_db
 
 load_dotenv()
 
@@ -106,4 +107,5 @@ def list_routes():
 
 
 if __name__ == "__main__":
+    init_db()
     app.run(host="0.0.0.0", port=3000)
