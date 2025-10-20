@@ -45,7 +45,6 @@ resource "aws_security_group" "app_sg" {
     Team        = "DevOps"
   }
 }
-
 resource "aws_security_group" "db_sg" {
   name        = "db-sg"
   description = "Allow PostgreSQL from app"
@@ -80,7 +79,7 @@ resource "aws_db_instance" "app_db" {
   allocated_storage  = 20
   username           = var.db_username
   password           = var.db_password
-  db_name            = "appdb"
+  db_name            = var.db_name
   vpc_security_group_ids = [aws_security_group.db_sg.id]
   skip_final_snapshot = true
 }
@@ -91,11 +90,11 @@ resource "aws_s3_bucket" "internal_bucket" {
 
   tags = {
     Name        = "InternalBucket"
-    Environment = "Dev"
+    Environment = "test"
   }
 }
 
-# Política mínima para acceso desde IAM roles (Lambda/ECS/etc.)
+# IAM roles 
 resource "aws_iam_policy" "s3_access_policy" {
   name        = "S3InternalAccess"
   description = "Permite listar y obtener objetos del bucket privado"
@@ -120,7 +119,6 @@ resource "aws_iam_policy" "s3_access_policy" {
     ]
   })
 }
-
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_s3_role"
 
@@ -133,24 +131,18 @@ resource "aws_iam_role" "ec2_role" {
     }]
   })
 }
-
 resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
   role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
-
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "ec2_instance_profile"
   role = aws_iam_role.ec2_role.name
 }
 
-# Crear Elastic IP
+# Elastic IP
 resource "aws_eip" "app_eip" {
-}
-
-resource "aws_eip_association" "eip_assoc" {
-  instance_id   = aws_instance.app_instance.id
-  allocation_id = aws_eip.app_eip.id
+  instance = aws_instance.app_instance.id
 }
 
 # EC2 Instance

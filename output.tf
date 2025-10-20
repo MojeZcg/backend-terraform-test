@@ -10,3 +10,7 @@ output "db_endpoint" {
 output "bucket_name" {
   value = aws_s3_bucket.internal_bucket.id
 }
+
+output "eip_address" {
+  value = aws_eip.app_eip.public_ip
+}
