@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 3000
 
 # Comando para correr la aplicación
-CMD ["gunicorn", "--bind", "0.0.0.0:3000", "--workers", "4", "main:app"]
+CMD ["python", "main.py"]
