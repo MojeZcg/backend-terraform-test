@@ -15,13 +15,6 @@ engine = create_engine(DATABASE_URL)
 s3 = boto3.client("s3")
 
 
-@app.route("/")
-def index():
-    with engine.connect() as conn:
-        result = conn.execute(text("SELECT 'Hola desde PostgreSQL!'")).fetchone()
-        return f"<h1>{result[0]}</h1>"
-
-
 @app.route("/u", methods=["GET"])
 def get_users():
     """Devuelve todos los usuarios en formato JSON"""

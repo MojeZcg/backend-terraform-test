@@ -11,7 +11,7 @@ sudo usermod -aG docker ec2-user
 # Clona el repositorio de la aplicación
 cd /home/ec2-user/
 git clone https://github.com/MojeZcg/backend-terraform-test.git app
-cd app/src
+cd app/backend
 
 # Variables de conexión a la DB (inyectadas desde Terraform)
 echo "DATABASE_URL=${database_url}" > .env
