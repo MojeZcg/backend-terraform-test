@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 # Establecer el directorio de trabajo 
 WORKDIR /app
@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 3000
 
 # Comando para correr la aplicación
-CMD ["gunicorn", "--bind", "0.0.0.0:3000", "--workers", "4", "app:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:3000", "--workers", "4", "main:app"]
